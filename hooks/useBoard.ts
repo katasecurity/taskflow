@@ -6,23 +6,15 @@ import { loadTasks, saveTasks } from "@/lib/localStorage";
 
 export const useBoard = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setTasks(loadTasks());
+    setIsLoaded(true);
   }, []);
 
- 
-  const updateTasks = (newTasks: Task[]) => {
-    setTasks(newTasks);
-    saveTasks(newTasks);
-  };
-
-
-  const addTask = (
-    title: string,
-    description: string,
-    columnId: ColumnId
-  ): void => {
+  const addTask = (title: string, description: string, columnId: ColumnId) => {
+    if (!title.trim()) return;
     const newTask: Task = {
       id: crypto.randomUUID(),
       title: title.trim(),
@@ -30,21 +22,30 @@ export const useBoard = () => {
       columnId,
       createdAt: new Date().toISOString(),
     };
-    updateTasks([...tasks, newTask]);
+    setTasks((prev) => {
+      const updated = [...prev, newTask];
+      saveTasks(updated);
+      return updated;
+    });
   };
 
-
-  const moveTask = (taskId: string, targetColumnId: ColumnId): void => {
-    const updated = tasks.map((task) =>
-      task.id === taskId ? { ...task, columnId: targetColumnId } : task
-    );
-    updateTasks(updated);
+  const moveTask = (taskId: string, targetColumnId: ColumnId) => {
+    setTasks((prev) => {
+      const updated = prev.map((t) =>
+        t.id === taskId ? { ...t, columnId: targetColumnId } : t
+      );
+      saveTasks(updated);
+      return updated;
+    });
   };
 
-
-  const deleteTask = (taskId: string): void => {
-    updateTasks(tasks.filter((task) => task.id !== taskId));
+  const deleteTask = (taskId: string) => {
+    setTasks((prev) => {
+      const updated = prev.filter((t) => t.id !== taskId);
+      saveTasks(updated);
+      return updated;
+    });
   };
 
-  return { tasks, addTask, moveTask, deleteTask };
+  return { tasks, addTask, moveTask, deleteTask, isLoaded };
 };

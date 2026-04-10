@@ -8,7 +8,7 @@ import { useBoard } from "@/hooks/useBoard";
 import { ColumnId } from "@/types";
 
 export default function HomePage() {
-  const { tasks, addTask, moveTask, deleteTask } = useBoard();
+  const { tasks, isLoaded, addTask, moveTask, deleteTask } = useBoard();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [defaultColumn, setDefaultColumn] = useState<ColumnId>("todo");
 
@@ -22,15 +22,14 @@ export default function HomePage() {
       <Header onAddTask={() => handleOpenModal()} />
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-            Доска
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-           Перетаскивайте задачи между таблицами
+          <h1 className="text-2xl font-bold text-white mb-1">Mоя доска</h1>
+          <p className="text-sm text-gray-500">
+            Перетаскивайте задачи между столбцами
           </p>
         </div>
         <Board
           tasks={tasks}
+          isLoaded={isLoaded}
           onMoveTask={moveTask}
           onDeleteTask={deleteTask}
           onAddTask={handleOpenModal}
