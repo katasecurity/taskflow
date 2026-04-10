@@ -1,6 +1,14 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useMemo } from "react";
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { ColumnId, COLUMNS, Task } from "@/types";
 import ColumnComponent from "./Column";
 
@@ -15,7 +23,14 @@ interface BoardProps {
 export default function Board({
   tasks, isLoaded, onMoveTask, onDeleteTask, onAddTask,
 }: BoardProps) {
-  const draggedTaskId = useRef<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    })
+  );
 
   const tasksByColumn = useMemo(() => {
     return tasks.reduce((acc, task) => {
@@ -25,14 +40,12 @@ export default function Board({
     }, {} as Record<ColumnId, Task[]>);
   }, [tasks]);
 
-  const handleDragStart = (taskId: string) => {
-    draggedTaskId.current = taskId;
-  };
-
-  const handleDrop = (targetColumnId: ColumnId) => {
-    if (!draggedTaskId.current) return;
-    onMoveTask(draggedTaskId.current, targetColumnId);
-    draggedTaskId.current = null;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    const taskId = active.id as string;
+    const targetColumnId = over.id as ColumnId;
+    onMoveTask(taskId, targetColumnId);
   };
 
   if (!isLoaded) {
@@ -41,16 +54,17 @@ export default function Board({
         {COLUMNS.map((col) => (
           <div
             key={col.id}
-            className="rounded-2xl bg-gray-900/50 border border-white/5 p-4 min-h-[520px] animate-pulse"
+            className="rounded-2xl bg-gray-900/50 border border-white/5
+                       min-h-[520px] p-4 animate-pulse"
           >
             <div className="flex items-center gap-2 mb-4">
-              <div className={`w-2 h-2 rounded-full ${col.accent} opacity-50`} />
+              <div className="w-2 h-2 rounded-full bg-gray-700" />
               <div className="h-3 w-20 bg-gray-800 rounded" />
             </div>
             <div className="h-px bg-white/5 mb-4" />
             <div className="flex flex-col gap-2.5">
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="h-20 bg-gray-800/60 rounded-xl" />
+                <div key={i} className="h-16 rounded-xl bg-gray-800/60" />
               ))}
             </div>
           </div>
@@ -60,18 +74,18 @@ export default function Board({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-      {COLUMNS.map((column) => (
-        <ColumnComponent
-          key={column.id}
-          column={column}
-          tasks={tasksByColumn[column.id] || []}
-          onDelete={onDeleteTask}
-          onDragStart={handleDragStart}
-          onDrop={handleDrop}
-          onAddTask={onAddTask}
-        />
-      ))}
-    </div>
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {COLUMNS.map((column) => (
+          <ColumnComponent
+            key={column.id}
+            column={column}
+            tasks={tasksByColumn[column.id] ?? []}
+            onDelete={onDeleteTask}
+            onAddTask={onAddTask}
+          />
+        ))}
+      </div>
+    </DndContext>
   );
 }

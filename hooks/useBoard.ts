@@ -13,6 +13,13 @@ export const useBoard = () => {
     setIsLoaded(true);
   }, []);
 
+
+  useEffect(() => {
+    if (isLoaded) {
+      saveTasks(tasks);
+    }
+  }, [tasks, isLoaded]);
+
   const addTask = (title: string, description: string, columnId: ColumnId) => {
     if (!title.trim()) return;
     const newTask: Task = {
@@ -22,30 +29,18 @@ export const useBoard = () => {
       columnId,
       createdAt: new Date().toISOString(),
     };
-    setTasks((prev) => {
-      const updated = [...prev, newTask];
-      saveTasks(updated);
-      return updated;
-    });
+    setTasks((prev) => [...prev, newTask]);
   };
 
   const moveTask = (taskId: string, targetColumnId: ColumnId) => {
-    setTasks((prev) => {
-      const updated = prev.map((t) =>
-        t.id === taskId ? { ...t, columnId: targetColumnId } : t
-      );
-      saveTasks(updated);
-      return updated;
-    });
+    setTasks((prev) =>
+      prev.map((t) => t.id === taskId ? { ...t, columnId: targetColumnId } : t)
+    );
   };
 
   const deleteTask = (taskId: string) => {
-    setTasks((prev) => {
-      const updated = prev.filter((t) => t.id !== taskId);
-      saveTasks(updated);
-      return updated;
-    });
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
-  return { tasks, addTask, moveTask, deleteTask, isLoaded };
+  return { tasks, isLoaded, addTask, moveTask, deleteTask };
 };
