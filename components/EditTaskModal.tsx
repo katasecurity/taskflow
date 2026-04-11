@@ -1,19 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Task } from "@/types";
 import { useBoardStore } from "@/store/boardStore";
 
-interface EditTaskModalProps {
-  task: Task | null; 
-  onClose: () => void;
-}
-
-export default function EditTaskModal({ task, onClose }: EditTaskModalProps) {
+export default function EditTaskModal() {
+  const task = useBoardStore((s) => s.editingTask);
+  const setEditingTask = useBoardStore((s) => s.setEditingTask);
   const editTask = useBoardStore((s) => s.editTask);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState(task?.title ?? "");
+  const [description, setDescription] = useState(task?.description ?? "");
 
   useEffect(() => {
     if (task) {
@@ -22,29 +18,37 @@ export default function EditTaskModal({ task, onClose }: EditTaskModalProps) {
     }
   }, [task]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setEditingTask(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [setEditingTask]);
+
   if (!task) return null;
+
+  const handleClose = () => setEditingTask(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
     editTask(task.id, title, description);
-    onClose();
+    handleClose();
   };
 
   return (
     <div
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={(e) => e.target === e.currentTarget && handleClose()}
       className="fixed inset-0 bg-black/60 backdrop-blur-sm
                  flex items-center justify-center z-50 p-4"
     >
       <div className="bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md
                       border border-white/10 overflow-hidden">
-        
-        <div className="flex items-center justify-between px-6 py-4
-                        border-b border-white/5">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
           <h2 className="text-base font-semibold text-white">Edit Task</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close modal"
             className="w-7 h-7 rounded-lg flex items-center justify-center
                        text-gray-500 hover:text-gray-300 hover:bg-white/10
@@ -55,11 +59,10 @@ export default function EditTaskModal({ task, onClose }: EditTaskModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
-         
           <div>
             <label className="block text-xs font-medium text-gray-400
                               mb-1.5 uppercase tracking-wider">
-              Название <span className="text-red-500">*</span>
+              Title <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -75,11 +78,10 @@ export default function EditTaskModal({ task, onClose }: EditTaskModalProps) {
             />
           </div>
 
-          
           <div>
             <label className="block text-xs font-medium text-gray-400
                               mb-1.5 uppercase tracking-wider">
-              Описание
+              Description
             </label>
             <textarea
               value={description}
@@ -94,11 +96,10 @@ export default function EditTaskModal({ task, onClose }: EditTaskModalProps) {
             />
           </div>
 
-         
           <div className="flex gap-2 pt-1">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="flex-1 py-2.5 rounded-xl text-sm font-medium
                          bg-white/5 hover:bg-white/10 text-gray-400
                          transition-colors"

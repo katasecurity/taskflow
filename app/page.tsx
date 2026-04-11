@@ -10,8 +10,7 @@ import { ColumnId } from "@/types";
 
 export default function HomePage() {
   const addTask = useBoardStore((s) => s.addTask);
-  const editingTask = useBoardStore((s) => s.editingTask);      
-  const setEditingTask = useBoardStore((s) => s.setEditingTask); 
+  const editingTask = useBoardStore((s) => s.editingTask);
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [defaultColumn, setDefaultColumn] = useState<ColumnId>("todo");
@@ -28,7 +27,7 @@ export default function HomePage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white mb-1">Mоя доска</h1>
           <p className="text-sm text-gray-500">
-           Перетаскивайте задачи между таблицами, чтоб обновить их статус
+            Перетаскивайте задачи между досками, чтоб обновить их статус
           </p>
         </div>
         <Board onAddTask={handleOpenAdd} />
@@ -41,11 +40,7 @@ export default function HomePage() {
         onAdd={addTask}
       />
 
-    
-      <EditTaskModal
-        task={editingTask}
-        onClose={() => setEditingTask(null)}
-      />
+      {editingTask && <EditTaskModal />}
     </div>
   );
 }
