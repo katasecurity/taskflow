@@ -35,30 +35,31 @@ export default function TaskCard({ task }: TaskCardProps) {
     <div
       ref={setNodeRef}
       style={style}
+  
+      {...attributes}
+      {...listeners}
       className={`
         bg-gray-800/60 border border-white/5 rounded-xl p-3.5
         hover:bg-gray-800 hover:border-white/10
         hover:shadow-xl hover:shadow-black/20
-        transition-all duration-150 group
-        ${isDragging ? "opacity-40 scale-95 shadow-2xl" : ""}
+        transition-all duration-150 group select-none
+        focus:outline-none focus:ring-2 focus:ring-white/20
+        ${isDragging
+          ? "opacity-40 scale-95 shadow-2xl cursor-grabbing"
+          : "cursor-grab"
+        }
       `}
-      
       role="article"
       aria-label={`Task: ${task.title}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3
-          {...attributes}
-          {...listeners}
-          className={`text-sm font-medium text-gray-100 leading-snug flex-1
-                      focus:outline-none focus:ring-2 focus:ring-white/20 rounded
-                      ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-        >
+        <h3 className="text-sm font-medium text-gray-100 leading-snug flex-1">
           {task.title}
         </h3>
         <button
+  
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={() => deleteTask(task.id)}
-         
           aria-label={`Delete task: ${task.title}`}
           className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-md
                      flex items-center justify-center flex-shrink-0
