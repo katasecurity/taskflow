@@ -13,14 +13,8 @@ interface TaskCardProps {
 export default function TaskCard({ task, onEdit }: TaskCardProps) {
   const deleteTask = useBoardStore((s) => s.deleteTask);
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: task.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -38,7 +32,6 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      
       onDoubleClick={() => onEdit(task)}
       className={`
         bg-gray-800/60 border border-white/5 rounded-xl p-3.5
@@ -46,10 +39,7 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
         hover:shadow-xl hover:shadow-black/20
         transition-all duration-150 group select-none
         focus:outline-none focus:ring-2 focus:ring-white/20
-        ${isDragging
-          ? "opacity-40 scale-95 shadow-2xl cursor-grabbing"
-          : "cursor-grab"
-        }
+        ${isDragging ? "opacity-40 scale-95 shadow-2xl cursor-grabbing" : "cursor-grab"}
       `}
       role="article"
       aria-label={`Task: ${task.title}. Double click to edit.`}
@@ -59,9 +49,8 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
           {task.title}
         </h3>
 
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100
-                        transition-all duration-150">
-         
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-150">
+          {/* Кнопка редактирования */}
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => onEdit(task)}
@@ -74,7 +63,7 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
             ✎
           </button>
 
-        
+          {/* Кнопка удаления */}
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => deleteTask(task.id)}
@@ -84,7 +73,7 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
                        focus:outline-none focus:ring-2 focus:ring-red-400/30
                        transition-all duration-150 text-base leading-none"
           >
-            
+            ×
           </button>
         </div>
       </div>
@@ -100,10 +89,8 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
           <div className="w-1 h-1 rounded-full bg-gray-600" aria-hidden="true" />
           <span className="text-xs text-gray-600">{formattedDate}</span>
         </div>
-        
-        <span className="text-xs text-gray-700 opacity-0 group-hover:opacity-100
-                         transition-opacity duration-150">
-          Двойной клик чтоб редактировать
+        <span className="text-xs text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+          двойной клик — редактировать
         </span>
       </div>
     </div>

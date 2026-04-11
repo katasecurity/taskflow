@@ -8,13 +8,14 @@ interface BoardStore {
   isLoaded: boolean;
   setLoaded: () => void;
   addTask: (title: string, description: string, columnId: ColumnId) => void;
+  editTask: (taskId: string, title: string, description: string) => void;
   moveTask: (taskId: string, columnId: ColumnId) => void;
   reorderTask: (taskId: string, overId: string, columnId: ColumnId) => void;
   deleteTask: (taskId: string) => void;
+  editTask: (taskId: string, title: string, description: string) => void;
 }
 
 export const useBoardStore = create<BoardStore>()(
-  
   persist(
     (set, get) => ({
       tasks: [],
@@ -34,6 +35,17 @@ export const useBoardStore = create<BoardStore>()(
         set({ tasks: [...get().tasks, newTask] });
       },
 
+      editTask: (taskId, title, description) => {
+  if (!title.trim()) return;
+  set({
+    tasks: get().tasks.map((t) =>
+      t.id === taskId
+        ? { ...t, title: title.trim(), description: description.trim() }
+        : t
+    ),
+  });
+},
+
       moveTask: (taskId, columnId) => {
         set({
           tasks: get().tasks.map((t) =>
@@ -42,15 +54,12 @@ export const useBoardStore = create<BoardStore>()(
         });
       },
 
-      
       reorderTask: (taskId, overId, columnId) => {
         const tasks = get().tasks;
         const oldIndex = tasks.findIndex((t) => t.id === taskId);
         const newIndex = tasks.findIndex((t) => t.id === overId);
         if (oldIndex === -1 || newIndex === -1) return;
-
         const reordered = arrayMove(tasks, oldIndex, newIndex);
-        
         const updated = reordered.map((t) =>
           t.id === taskId ? { ...t, columnId } : t
         );
@@ -63,7 +72,6 @@ export const useBoardStore = create<BoardStore>()(
     }),
     {
       name: "taskflow-tasks",
-      
       onRehydrateStorage: () => (state) => {
         state?.setLoaded();
       },
