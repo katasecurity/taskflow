@@ -2,13 +2,8 @@
 
 import { useMemo } from "react";
 import {
-  DndContext,
-  DragEndEvent,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  closestCorners,
+  DndContext, DragEndEvent, PointerSensor,
+  TouchSensor, useSensor, useSensors, closestCorners,
 } from "@dnd-kit/core";
 import { ColumnId, COLUMNS, Task } from "@/types";
 import { useBoardStore } from "@/store/boardStore";
@@ -16,9 +11,10 @@ import ColumnComponent from "./Column";
 
 interface BoardProps {
   onAddTask: (columnId: ColumnId) => void;
+  onEdit: (task: Task) => void;
 }
 
-export default function Board({ onAddTask }: BoardProps) {
+export default function Board({ onAddTask, onEdit }: BoardProps) {
   const tasks = useBoardStore((s) => s.tasks);
   const isLoaded = useBoardStore((s) => s.isLoaded);
   const moveTask = useBoardStore((s) => s.moveTask);
@@ -40,23 +36,15 @@ export default function Board({ onAddTask }: BoardProps) {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) return;
-
     const taskId = active.id as string;
     const overId = over.id as string;
-
-
     const activeTask = tasks.find((t) => t.id === taskId);
     if (!activeTask) return;
 
     const isOverColumn = COLUMNS.some((c) => c.id === overId);
-
     if (isOverColumn) {
-     
-      if (activeTask.columnId !== overId) {
-        moveTask(taskId, overId as ColumnId);
-      }
+      if (activeTask.columnId !== overId) moveTask(taskId, overId as ColumnId);
     } else {
-     
       const overTask = tasks.find((t) => t.id === overId);
       if (!overTask) return;
       reorderTask(taskId, overId, overTask.columnId);
@@ -67,11 +55,9 @@ export default function Board({ onAddTask }: BoardProps) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {COLUMNS.map((col) => (
-          <div
-            key={col.id}
-            className="rounded-2xl bg-gray-900/50 border border-white/5
-                       min-h-[520px] p-4 animate-pulse"
-          >
+          <div key={col.id}
+               className="rounded-2xl bg-gray-900/50 border border-white/5
+                          min-h-[520px] p-4 animate-pulse">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-2 h-2 rounded-full bg-gray-700" />
               <div className="h-3 w-20 bg-gray-800 rounded" />
@@ -99,6 +85,7 @@ export default function Board({ onAddTask }: BoardProps) {
             column={column}
             tasks={tasksByColumn[column.id] ?? []}
             onAddTask={onAddTask}
+            onEdit={onEdit} // ✅
           />
         ))}
       </div>

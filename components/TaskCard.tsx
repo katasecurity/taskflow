@@ -7,9 +7,10 @@ import { useBoardStore } from "@/store/boardStore";
 
 interface TaskCardProps {
   task: Task;
+  onEdit: (task: Task) => void;
 }
 
-export default function TaskCard({ task }: TaskCardProps) {
+export default function TaskCard({ task, onEdit }: TaskCardProps) {
   const deleteTask = useBoardStore((s) => s.deleteTask);
 
   const {
@@ -35,9 +36,10 @@ export default function TaskCard({ task }: TaskCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-  
       {...attributes}
       {...listeners}
+      
+      onDoubleClick={() => onEdit(task)}
       className={`
         bg-gray-800/60 border border-white/5 rounded-xl p-3.5
         hover:bg-gray-800 hover:border-white/10
@@ -50,26 +52,41 @@ export default function TaskCard({ task }: TaskCardProps) {
         }
       `}
       role="article"
-      aria-label={`Task: ${task.title}`}
+      aria-label={`Task: ${task.title}. Double click to edit.`}
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-sm font-medium text-gray-100 leading-snug flex-1">
           {task.title}
         </h3>
-        <button
-  
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={() => deleteTask(task.id)}
-          aria-label={`Delete task: ${task.title}`}
-          className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-md
-                     flex items-center justify-center flex-shrink-0
-                     text-gray-500 hover:text-red-400 hover:bg-red-400/10
-                     focus:opacity-100 focus:outline-none focus:ring-2
-                     focus:ring-red-400/30 transition-all duration-150
-                     text-base leading-none"
-        >
-          ×
-        </button>
+
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100
+                        transition-all duration-150">
+         
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => onEdit(task)}
+            aria-label={`Edit task: ${task.title}`}
+            className="w-5 h-5 rounded-md flex items-center justify-center
+                       text-gray-500 hover:text-indigo-400 hover:bg-indigo-400/10
+                       focus:outline-none focus:ring-2 focus:ring-indigo-400/30
+                       transition-all duration-150 text-xs"
+          >
+            ✎
+          </button>
+
+        
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => deleteTask(task.id)}
+            aria-label={`Delete task: ${task.title}`}
+            className="w-5 h-5 rounded-md flex items-center justify-center
+                       text-gray-500 hover:text-red-400 hover:bg-red-400/10
+                       focus:outline-none focus:ring-2 focus:ring-red-400/30
+                       transition-all duration-150 text-base leading-none"
+          >
+            
+          </button>
+        </div>
       </div>
 
       {task.description && (
@@ -78,9 +95,16 @@ export default function TaskCard({ task }: TaskCardProps) {
         </p>
       )}
 
-      <div className="mt-3 flex items-center gap-1.5">
-        <div className="w-1 h-1 rounded-full bg-gray-600" aria-hidden="true" />
-        <span className="text-xs text-gray-600">{formattedDate}</span>
+      <div className="mt-3 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <div className="w-1 h-1 rounded-full bg-gray-600" aria-hidden="true" />
+          <span className="text-xs text-gray-600">{formattedDate}</span>
+        </div>
+        
+        <span className="text-xs text-gray-700 opacity-0 group-hover:opacity-100
+                         transition-opacity duration-150">
+          Двойной клик чтоб редактировать
+        </span>
       </div>
     </div>
   );
