@@ -8,28 +8,25 @@ import {
   TouchSensor,
   useSensor,
   useSensors,
+  closestCorners,
 } from "@dnd-kit/core";
 import { ColumnId, COLUMNS, Task } from "@/types";
+import { useBoardStore } from "@/store/boardStore";
 import ColumnComponent from "./Column";
 
 interface BoardProps {
-  tasks: Task[];
-  isLoaded: boolean;
-  onMoveTask: (taskId: string, columnId: ColumnId) => void;
-  onDeleteTask: (taskId: string) => void;
   onAddTask: (columnId: ColumnId) => void;
 }
 
-export default function Board({
-  tasks, isLoaded, onMoveTask, onDeleteTask, onAddTask,
-}: BoardProps) {
+export default function Board({ onAddTask }: BoardProps) {
+  const tasks = useBoardStore((s) => s.tasks);
+  const isLoaded = useBoardStore((s) => s.isLoaded);
+  const moveTask = useBoardStore((s) => s.moveTask);
+  const reorderTask = useBoardStore((s) => s.reorderTask);
+
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
   );
 
   const tasksByColumn = useMemo(() => {
@@ -43,9 +40,27 @@ export default function Board({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) return;
+
     const taskId = active.id as string;
-    const targetColumnId = over.id as ColumnId;
-    onMoveTask(taskId, targetColumnId);
+    const overId = over.id as string;
+
+
+    const activeTask = tasks.find((t) => t.id === taskId);
+    if (!activeTask) return;
+
+    const isOverColumn = COLUMNS.some((c) => c.id === overId);
+
+    if (isOverColumn) {
+     
+      if (activeTask.columnId !== overId) {
+        moveTask(taskId, overId as ColumnId);
+      }
+    } else {
+     
+      const overTask = tasks.find((t) => t.id === overId);
+      if (!overTask) return;
+      reorderTask(taskId, overId, overTask.columnId);
+    }
   };
 
   if (!isLoaded) {
@@ -62,11 +77,9 @@ export default function Board({
               <div className="h-3 w-20 bg-gray-800 rounded" />
             </div>
             <div className="h-px bg-white/5 mb-4" />
-            <div className="flex flex-col gap-2.5">
-              {[...Array(2)].map((_, i) => (
-                <div key={i} className="h-16 rounded-xl bg-gray-800/60" />
-              ))}
-            </div>
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="h-16 rounded-xl bg-gray-800/60 mb-2.5" />
+            ))}
           </div>
         ))}
       </div>
@@ -74,14 +87,17 @@ export default function Board({
   }
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragEnd={handleDragEnd}
+    >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {COLUMNS.map((column) => (
           <ColumnComponent
             key={column.id}
             column={column}
             tasks={tasksByColumn[column.id] ?? []}
-            onDelete={onDeleteTask}
             onAddTask={onAddTask}
           />
         ))}
