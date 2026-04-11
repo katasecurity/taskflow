@@ -11,12 +11,6 @@ export default function EditTaskModal() {
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
 
-  useEffect(() => {
-    if (task) {
-      setTitle(task.title);
-      setDescription(task.description);
-    }
-  }, [task]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
