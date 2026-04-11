@@ -6,13 +6,14 @@ import { Task, ColumnId } from "@/types";
 interface BoardStore {
   tasks: Task[];
   isLoaded: boolean;
+  editingTask: Task | null;                                             
   setLoaded: () => void;
+  setEditingTask: (task: Task | null) => void;                         
   addTask: (title: string, description: string, columnId: ColumnId) => void;
-  editTask: (taskId: string, title: string, description: string) => void;
+  editTask: (taskId: string, title: string, description: string) => void; 
   moveTask: (taskId: string, columnId: ColumnId) => void;
   reorderTask: (taskId: string, overId: string, columnId: ColumnId) => void;
   deleteTask: (taskId: string) => void;
-  editTask: (taskId: string, title: string, description: string) => void;
 }
 
 export const useBoardStore = create<BoardStore>()(
@@ -20,8 +21,12 @@ export const useBoardStore = create<BoardStore>()(
     (set, get) => ({
       tasks: [],
       isLoaded: false,
+      editingTask: null,
 
       setLoaded: () => set({ isLoaded: true }),
+
+      
+      setEditingTask: (task) => set({ editingTask: task }),
 
       addTask: (title, description, columnId) => {
         if (!title.trim()) return;
@@ -36,15 +41,15 @@ export const useBoardStore = create<BoardStore>()(
       },
 
       editTask: (taskId, title, description) => {
-  if (!title.trim()) return;
-  set({
-    tasks: get().tasks.map((t) =>
-      t.id === taskId
-        ? { ...t, title: title.trim(), description: description.trim() }
-        : t
-    ),
-  });
-},
+        if (!title.trim()) return;
+        set({
+          tasks: get().tasks.map((t) =>
+            t.id === taskId
+              ? { ...t, title: title.trim(), description: description.trim() }
+              : t
+          ),
+        });
+      },
 
       moveTask: (taskId, columnId) => {
         set({

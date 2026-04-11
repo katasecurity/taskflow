@@ -9,12 +9,9 @@ interface ColumnProps {
   column: Column;
   tasks: Task[];
   onAddTask: (columnId: ColumnId) => void;
-  onEdit: (task: Task) => void;
 }
 
-export default function ColumnComponent({
-  column, tasks, onAddTask, onEdit,
-}: ColumnProps) {
+export default function ColumnComponent({ column, tasks, onAddTask }: ColumnProps) {
   const { dot, text, border } = column.classes;
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
 
@@ -34,8 +31,7 @@ export default function ColumnComponent({
           <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
             {column.title}
           </h2>
-          <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md
-                            bg-white/5 ${text}`}
+          <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md bg-white/5 ${text}`}
                 aria-label={`${tasks.length} tasks`}>
             {tasks.length}
           </span>
@@ -46,8 +42,7 @@ export default function ColumnComponent({
           className="w-6 h-6 rounded-lg flex items-center justify-center
                      text-gray-500 hover:text-gray-200 hover:bg-white/10
                      transition-all duration-150 text-lg leading-none
-                     active:scale-90 focus:outline-none focus:ring-2
-                     focus:ring-white/20"
+                     active:scale-90 focus:outline-none focus:ring-2 focus:ring-white/20"
         >
           +
         </button>
@@ -55,17 +50,10 @@ export default function ColumnComponent({
 
       <div className="h-px bg-white/5 mb-4" />
 
-      <SortableContext
-        items={tasks.map((t) => t.id)}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2.5 flex-1">
           {tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onEdit={onEdit} 
-            />
+            <TaskCard key={task.id} task={task} />
           ))}
 
           {tasks.length === 0 && (
@@ -87,13 +75,10 @@ export default function ColumnComponent({
               `}
             >
               <div className={`w-8 h-8 rounded-xl flex items-center justify-center
-                              bg-white/5 group-hover:bg-white/10 transition-colors
-                              text-lg ${text}`}>
+                              bg-white/5 group-hover:bg-white/10 transition-colors text-lg ${text}`}>
                 +
               </div>
-              <p className="text-xs text-gray-600 group-hover:text-gray-500">
-                Добавить задание
-              </p>
+              <p className="text-xs text-gray-600 group-hover:text-gray-500">Add a task</p>
             </div>
           )}
         </div>

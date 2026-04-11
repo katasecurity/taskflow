@@ -7,11 +7,11 @@ import { useBoardStore } from "@/store/boardStore";
 
 interface TaskCardProps {
   task: Task;
-  onEdit: (task: Task) => void;
 }
 
-export default function TaskCard({ task, onEdit }: TaskCardProps) {
+export default function TaskCard({ task }: TaskCardProps) {
   const deleteTask = useBoardStore((s) => s.deleteTask);
+  const setEditingTask = useBoardStore((s) => s.setEditingTask);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id });
@@ -32,7 +32,7 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      onDoubleClick={() => onEdit(task)}
+      onDoubleClick={() => setEditingTask(task)}
       className={`
         bg-gray-800/60 border border-white/5 rounded-xl p-3.5
         hover:bg-gray-800 hover:border-white/10
@@ -49,11 +49,11 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
           {task.title}
         </h3>
 
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-150">
-          {/* Кнопка редактирования */}
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100
+                        transition-all duration-150">
           <button
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => onEdit(task)}
+            onClick={() => setEditingTask(task)}
             aria-label={`Edit task: ${task.title}`}
             className="w-5 h-5 rounded-md flex items-center justify-center
                        text-gray-500 hover:text-indigo-400 hover:bg-indigo-400/10
@@ -62,8 +62,6 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
           >
             ✎
           </button>
-
-          {/* Кнопка удаления */}
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => deleteTask(task.id)}
@@ -89,7 +87,8 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
           <div className="w-1 h-1 rounded-full bg-gray-600" aria-hidden="true" />
           <span className="text-xs text-gray-600">{formattedDate}</span>
         </div>
-        <span className="text-xs text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        <span className="text-xs text-gray-700 opacity-0 group-hover:opacity-100
+                         transition-opacity duration-150">
           двойной клик — редактировать
         </span>
       </div>
